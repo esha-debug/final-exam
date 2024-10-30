@@ -1,0 +1,44 @@
+# .github/settings.yml
+repository:
+  # Enable vulnerability alerts
+  enable_vulnerability_alerts: true
+  # Enable automated security fixes
+  enable_automated_security_fixes: true
+
+branches:
+  - name: main
+    protection:
+      required_status_checks:
+        strict: true
+        contexts:
+          - security-scan
+          - build-and-scan
+      required_pull_request_reviews:
+        required_approving_review_count: 2
+      enforce_admins: true
+
+6. GitHub Secrets Configuration
+KUBERNETES_CONFIG
+SNYK_TOKEN
+REGISTRY_USERNAME
+REGISTRY_PASSWORD
+
+7. Security Scanning Configuration
+# .github/workflows/security-scan.yml
+name: Security Scan
+
+on:
+  schedule:
+    - cron: '0 0 * * *'  # Daily scan
+  workflow_dispatch:
+
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Run OWASP ZAP Scan
+        uses: zaproxy/action-full-scan@v0.4.0
+        with:
+          target: 'https:/application-url.com'

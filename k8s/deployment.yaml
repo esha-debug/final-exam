@@ -1,0 +1,23 @@
+deploy:
+    needs: build-and-scan
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Deploy to Kubernetes
+        uses: azure/k8s-deploy@v4
+        with:
+          manifests: |
+            kubernetes/deployment.yml
+            kubernetes/service.yml
+          images: |
+            ${{ env.REGISTRY }}/${{ env.ubuntu_app }}:${{ github.sha }}
+          namespace: production
